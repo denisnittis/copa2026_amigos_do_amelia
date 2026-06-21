@@ -349,6 +349,8 @@ function traduzirPais(nomeOriginal) {
 
 let usuarioAtual = null;
 let pinAtual = null;
+let abaAtual = "palpites";
+let intervaloAutoRefresh = null;
 
 /* ---------- Helpers de API ---------- */
 
@@ -430,6 +432,7 @@ async function tentarLogin() {
       document.getElementById("nome-usuario-logado").textContent = usuarioAtual;
       carregarJogos();
       carregarRanking();
+      iniciarAutoRefresh();
     } else {
       erroEl.textContent = resultado.erro || "Não foi possível entrar.";
       erroEl.style.display = "block";
@@ -444,6 +447,7 @@ async function tentarLogin() {
 }
 
 function logout() {
+  pararAutoRefresh();
   usuarioAtual = null;
   pinAtual = null;
   document.getElementById("login-pin").value = "";
@@ -454,6 +458,7 @@ function logout() {
 /* ---------- Abas ---------- */
 
 function trocarAba(aba) {
+  abaAtual = aba;
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === aba));
   document.getElementById("secao-palpites").style.display = aba === "palpites" ? "block" : "none";
   document.getElementById("secao-ranking").style.display = aba === "ranking" ? "block" : "none";
@@ -461,6 +466,48 @@ function trocarAba(aba) {
   if (aba === "ranking") carregarRanking();
   if (aba === "historico") carregarHistorico();
 }
+
+/* ---------- Auto-refresh ----------
+   Recarrega automaticamente a cada 60s, mas só a aba que está visível no
+   momento — evita gastar chamadas à toa nas abas escondidas. Pausa quando
+   o celular bloqueia a tela ou o usuário troca de app (economiza bateria
+   e dados), e retoma assim que a página volta a ficar visível. */
+
+function recarregarAbaAtual() {
+  // Não interrompe a pessoa se ela estiver no meio de digitar um placar —
+  // simplesmente pula esta rodada do auto-refresh; o próximo ciclo de 60s
+  // tenta de novo. Isso evita apagar um palpite que ainda não foi confirmado.
+  const elementoFocado = document.activeElement;
+  const estaDigitandoPlacar = elementoFocado &&
+    (elementoFocado.classList.contains("input-casa") || elementoFocado.classList.contains("input-fora"));
+  if (estaDigitandoPlacar) return;
+
+  if (abaAtual === "palpites") carregarJogos();
+  else if (abaAtual === "ranking") carregarRanking();
+  else if (abaAtual === "historico") carregarHistorico();
+}
+
+function iniciarAutoRefresh() {
+  pararAutoRefresh(); // evita duplicar o intervalo se já existir um rodando
+  intervaloAutoRefresh = setInterval(recarregarAbaAtual, 60000);
+}
+
+function pararAutoRefresh() {
+  if (intervaloAutoRefresh) {
+    clearInterval(intervaloAutoRefresh);
+    intervaloAutoRefresh = null;
+  }
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (!usuarioAtual) return; // só importa depois do login
+  if (document.hidden) {
+    pararAutoRefresh();
+  } else {
+    recarregarAbaAtual(); // atualiza assim que volta a ficar visível
+    iniciarAutoRefresh();
+  }
+});
 
 /* ---------- Palpites ---------- */
 
