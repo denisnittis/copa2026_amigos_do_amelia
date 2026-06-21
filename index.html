@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0A2A4D">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Amigos do Amélia - Copa 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #0A2A4D;
+    background-image: radial-gradient(circle at 50% 0%, #133F70 0%, #0A2A4D 60%);
+    background-attachment: fixed;
+    color: #F7F5F0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    font-size: 16px;
+    line-height: 1.4;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .oswald { font-family: 'Oswald', sans-serif; }
+
+  /* ---------- LOGIN ---------- */
+  #tela-login {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    padding-top: calc(1rem + env(safe-area-inset-top));
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+  .login-box { width: 100%; max-width: 420px; }
+  .login-header { text-align: center; margin-bottom: 1.75rem; }
+  .login-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 60px; height: 60px; border-radius: 50%; background: #D4A843;
+    margin-bottom: 1rem; font-size: 26px;
+  }
+  .login-title { font-size: clamp(1.5rem, 6vw, 1.9rem); text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.15; }
+  .login-sub { color: #D4A843; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.15em; margin-top: 0.3rem; }
+
+  .card {
+    background: #0E2F54; border: 1px solid #1F5A8F; border-radius: 12px; padding: 1.5rem 1.25rem;
+  }
+  label.field-label {
+    display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
+    color: #D4A843; margin-bottom: 0.5rem;
+  }
+  select, input {
+    width: 100%; background: #0A2A4D; border: 1px solid #1F5A8F; border-radius: 8px;
+    padding: 0.85rem 0.9rem; color: #F7F5F0; font-family: 'Inter', sans-serif; font-size: 16px;
+    margin-bottom: 1.1rem; outline: none; min-height: 50px; -webkit-appearance: none; appearance: none;
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23D4A843' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem;
+  }
+  select:focus, input:focus { box-shadow: 0 0 0 2px #D4A843; }
+  input[type="password"] { text-align: center; letter-spacing: 0.5em; }
+
+  .btn-primary {
+    width: 100%; background: #D4A843; color: #0A2A4D; border: none; border-radius: 8px;
+    padding: 0.9rem; font-family: 'Oswald', sans-serif; text-transform: uppercase;
+    letter-spacing: 0.05em; font-weight: 600; font-size: 1rem; cursor: pointer;
+    transition: background 0.15s; min-height: 50px;
+  }
+  .btn-primary:active { background: #E0B85A; transform: scale(0.99); }
+  .btn-primary:disabled { background: #2E4565; color: #6B7E97; cursor: not-allowed; }
+
+  .erro-msg { color: #E8847B; font-size: 0.85rem; margin: -0.5rem 0 0.75rem; }
+  .demo-hint { text-align: center; color: #E5E9EF; font-size: 0.75rem; margin-top: 1rem; opacity: 0.7; }
+
+  /* ---------- APP PRINCIPAL ---------- */
+  #app { display: none; min-height: 100vh; min-height: 100dvh; }
+
+  header { border-bottom: 1px solid #1F5A8F; position: sticky; top: 0; background: rgba(10,42,77,0.97); backdrop-filter: blur(8px); z-index: 10; padding-top: env(safe-area-inset-top); }
+  .header-top { max-width: 680px; margin: 0 auto; padding: 0.85rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+  .header-brand { display: flex; align-items: center; gap: 0.45rem; font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.02em; font-size: clamp(0.85rem, 4vw, 1rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .header-user { display: flex; align-items: center; gap: 0.4rem; color: #D4A843; font-size: 0.9rem; background: none; border: none; cursor: pointer; padding: 0.5rem; margin: -0.5rem; flex-shrink: 0; }
+  .header-user:active { color: #F7F5F0; }
+
+  .tabs { max-width: 680px; margin: 0 auto; padding: 0 0.75rem 0.6rem; display: flex; gap: 0.4rem; }
+  .tab-btn {
+    flex: 1; padding: 0.6rem 1rem; border-radius: 999px; font-size: 0.9rem; border: none; cursor: pointer;
+    color: #D4A843; background: transparent; transition: background 0.15s; min-height: 42px; font-family: 'Inter', sans-serif; font-weight: 500;
+  }
+  .tab-btn:active { background: #0E2F54; }
+  .tab-btn.active { background: #D4A843; color: #0A2A4D; font-weight: 600; }
+
+  main { max-width: 680px; margin: 0 auto; padding: 1.25rem 0.85rem 3rem; padding-bottom: calc(3rem + env(safe-area-inset-bottom)); }
+
+  .section-title { display: flex; align-items: center; gap: 0.5rem; font-family: 'Oswald', sans-serif; font-size: clamp(1.1rem, 5vw, 1.3rem); text-transform: uppercase; letter-spacing: 0.02em; margin-bottom: 0.3rem; }
+  .section-hint { color: #D4A843; font-size: 0.85rem; margin-bottom: 1.2rem; line-height: 1.5; }
+
+  /* Card de jogo */
+  .jogo-card { background: #0E2F54; border: 1px solid #1F5A8F; border-radius: 12px; overflow: hidden; margin-bottom: 1rem; }
+
+  /* Agrupamento por dia */
+  .dia-grupo { margin-bottom: 1.75rem; }
+  .dia-grupo:last-child { margin-bottom: 0; }
+  .dia-header {
+    display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem; border-bottom: 1px solid #1F5A8F;
+  }
+  .dia-titulo { font-family: 'Oswald', sans-serif; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.03em; color: #D4A843; }
+  .dia-contagem { font-size: 0.72rem; color: #E5E9EF; }
+
+  .jogo-header { display: flex; align-items: center; justify-content: space-between; padding: 0.55rem 0.9rem; background: #0A2A4D; border-bottom: 1px solid #1F5A8F; gap: 0.5rem; }
+  .jogo-fase { color: #D4A843; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .jogo-data { color: #D4A843; font-size: 0.72rem; display: flex; align-items: center; gap: 0.3rem; white-space: nowrap; flex-shrink: 0; }
+  .jogo-body { padding: 1rem 0.9rem 1.1rem; }
+  .placar-row { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+  .time-casa, .time-fora { flex: 1; min-width: 0; }
+  .time-nome { text-align: right; font-family: 'Oswald', sans-serif; font-size: clamp(0.85rem, 4vw, 1.05rem); text-transform: uppercase; line-height: 1.15; word-break: break-word; }
+  .time-sigla { text-align: right; color: #D4A843; font-size: 0.7rem; margin-top: 0.15rem; letter-spacing: 0.04em; }
+  .time-fora .time-nome, .time-fora .time-sigla { text-align: left; }
+  .placar-inputs { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
+  .placar-inputs input {
+    width: 50px; height: 54px; text-align: center; margin: 0; font-family: 'Oswald', sans-serif;
+    font-size: 1.3rem; padding: 0; -moz-appearance: textfield;
+  }
+  .placar-inputs input::-webkit-outer-spin-button,
+  .placar-inputs input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .placar-x { color: #D4A843; font-family: 'Oswald', sans-serif; font-size: 1.1rem; flex-shrink: 0; }
+  .resultado-final { margin-top: 0.85rem; text-align: center; color: #D4A843; font-size: 0.88rem; }
+  .resultado-aovivo { margin-top: 0.85rem; text-align: center; color: #E8847B; font-size: 0.88rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+  .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: #E8847B; animation: pulse 1.5s infinite; flex-shrink: 0; }
+  @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.3 } }
+  .btn-confirmar { width: 100%; margin-top: 1.1rem; background: #D4A843; color: #0A2A4D; border: none; border-radius: 8px; padding: 0.75rem; font-family: 'Oswald', sans-serif; text-transform: uppercase; font-size: 0.85rem; font-weight: 600; cursor: pointer; min-height: 46px; }
+  .btn-confirmar:active { background: #E0B85A; }
+  .btn-confirmar:disabled { background: #2E4565; color: #6B7E97; cursor: not-allowed; }
+  .msg-travado { margin-top: 1.1rem; text-align: center; color: #E5E9EF; font-size: 0.83rem; }
+
+  /* Palpites dos outros (visível só depois do jogo começar) */
+  .outros-palpites { margin-top: 1rem; padding-top: 0.75rem; border-top: 1px dashed #1F5A8F; }
+  .outros-titulo { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: #D4A843; margin-bottom: 0.5rem; }
+  .outro-palpite-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.2rem 0; color: #F7F5F0; }
+  .outro-palpite-pts { color: #D4A843; font-weight: 600; }
+
+  /* Ranking */
+  .ranking-list { background: #0E2F54; border: 1px solid #1F5A8F; border-radius: 12px; overflow: hidden; }
+  .ranking-row { display: flex; align-items: center; gap: 0.65rem; padding: 0.85rem 0.9rem; border-bottom: 1px solid #1F5A8F; }
+  .ranking-row:last-child { border-bottom: none; }
+  .ranking-row.lider { background: linear-gradient(to right, #2E2410, transparent); }
+  .ranking-pos { font-family: 'Oswald', sans-serif; font-size: 1.1rem; width: 1.6rem; text-align: center; color: #E5E9EF; flex-shrink: 0; }
+  .ranking-row.lider .ranking-pos { color: #D4A843; }
+  .ranking-nome { font-weight: 500; font-size: 0.95rem; }
+  .ranking-row.lider .ranking-nome { color: #D4A843; }
+  .ranking-detalhe { color: #E5E9EF; font-size: 0.7rem; display: flex; gap: 0.6rem; margin-top: 0.2rem; flex-wrap: wrap; }
+  .ranking-pontos { font-family: 'Oswald', sans-serif; font-size: 1.3rem; margin-left: auto; flex-shrink: 0; text-align: right; }
+  .ranking-pontos small { font-size: 0.62rem; color: #E5E9EF; font-family: 'Inter', sans-serif; margin-left: 0.15rem; }
+
+  .legenda-pontos { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.75rem; }
+  .legenda-item { background: #0E2F54; border: 1px solid #1F5A8F; border-radius: 6px; padding: 0.4rem 0.65rem; font-size: 0.74rem; }
+  .legenda-item b { color: #D4A843; }
+
+  .resultados-list { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
+  .resultado-row { background: #0E2F54; border: 1px solid #1F5A8F; border-radius: 8px; padding: 0.65rem 0.9rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; gap: 0.5rem; }
+  .resultado-row span:first-child { min-width: 0; word-break: break-word; }
+  .resultado-placar { font-family: 'Oswald', sans-serif; font-size: 1.05rem; color: #D4A843; flex-shrink: 0; }
+
+  .loading, .empty-state { text-align: center; color: #D4A843; padding: 2rem 1rem; font-size: 0.9rem; }
+  .toast {
+    position: fixed; bottom: calc(1.5rem + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+    background: #0E2F54; border: 1px solid #D4A843; color: #F7F5F0; padding: 0.7rem 1.3rem;
+    border-radius: 8px; font-size: 0.85rem; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 50;
+    max-width: calc(100vw - 2rem); text-align: center;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ---------- AJUSTES PARA TELAS MUITO ESTREITAS (iPhone SE e similares) ---------- */
+  @media (max-width: 360px) {
+    .placar-row { flex-wrap: wrap; }
+    .time-nome { font-size: 0.8rem; }
+    .placar-inputs input { width: 44px; height: 48px; font-size: 1.15rem; }
+    .login-box { max-width: 100%; }
+  }
+
+  /* ---------- TOUCH: remove hovers em dispositivos sem mouse, mantém apenas active ---------- */
+  @media (hover: none) {
+    .tab-btn:hover, .btn-primary:hover, .btn-confirmar:hover, .header-user:hover { background: initial; color: initial; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== TELA DE LOGIN ===================== -->
+<div id="tela-login">
+  <div class="login-box">
+    <div class="login-header">
+      <div class="login-icon">🏆</div>
+      <div class="login-title oswald">Amigos do Amélia</div>
+      <div class="login-sub">Copa 2026</div>
+    </div>
+
+    <div class="card">
+      <label class="field-label">Seu nome</label>
+      <select id="login-nome"></select>
+
+      <label class="field-label">PIN de 4 dígitos</label>
+      <input type="password" id="login-pin" inputmode="numeric" maxlength="4" placeholder="••••">
+
+      <div class="erro-msg" id="login-erro" style="display:none;"></div>
+
+      <button class="btn-primary" id="btn-login">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== APP PRINCIPAL ===================== -->
+<div id="app">
+  <header>
+    <div class="header-top">
+      <div class="header-brand">🏆 Amigos do Amélia</div>
+      <button class="header-user" id="btn-logout"><span id="nome-usuario-logado"></span> ⎋</button>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="palpites">Palpites</button>
+      <button class="tab-btn" data-tab="ranking">Ranking</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="secao-palpites">
+      <div class="section-title">🎯 Seus palpites</div>
+      <div class="section-hint">Os palpites dos outros participantes ficam ocultos até o apito inicial. O palpite trava 5 minutos antes de cada jogo começar.</div>
+      <div id="lista-jogos" class="loading">Carregando jogos...</div>
+    </div>
+
+    <div id="secao-ranking" style="display:none;">
+      <div class="section-title">🏆 Classificação geral</div>
+      <div id="lista-ranking" class="loading">Carregando ranking...</div>
+
+      <div class="legenda-pontos">
+        <span class="legenda-item">Placar exato <b>5 pts</b></span>
+        <span class="legenda-item">Acertou vencedor <b>3 pts</b></span>
+        <span class="legenda-item">Errou <b style="color:#8A6A66">0 pts</b></span>
+      </div>
+
+      <div style="margin-top:1.5rem;">
+        <div class="outros-titulo" style="margin-bottom:0.5rem;">Resultados encerrados</div>
+        <div id="lista-resultados" class="resultados-list"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   CONFIGURAÇÃO — troque pela URL do seu Web App se mudar
+   ========================================================= */
+const BACKEND_URL = "https://script.google.com/macros/s/AKfycbwZSgrXZdj-sZ6-OgfxsNf6Tg43Kz1OhftQmmWGby3Fp1guomuzv0bJD2pQf7NkRKRG/exec";
+
+const PARTICIPANTES = ["Alejandro", "Carlos Eduardo", "Denis", "Diego", "Fabio Gambini", "Fabio Sabão", "Murilo", "Vitor"];
+
+/* Tradução de nomes de seleções (ESPN manda em inglês) — só para exibição.
+   Não afeta os dados enviados/recebidos do backend, que continuam intactos. */
+const NOMES_PAISES_PT = {
+  "United States": "Estados Unidos",
+  "Mexico": "México",
+  "Canada": "Canadá",
+  "Australia": "Austrália",
+  "Iraq": "Iraque",
+  "Iran": "Irã",
+  "IR Iran": "Irã",
+  "Japan": "Japão",
+  "Jordan": "Jordânia",
+  "South Korea": "Coreia do Sul",
+  "Korea Republic": "Coreia do Sul",
+  "Qatar": "Catar",
+  "Saudi Arabia": "Arábia Saudita",
+  "Uzbekistan": "Uzbequistão",
+  "Algeria": "Argélia",
+  "Cape Verde": "Cabo Verde",
+  "Cabo Verde": "Cabo Verde",
+  "DR Congo": "Congo (RD)",
+  "Congo DR": "Congo (RD)",
+  "Ivory Coast": "Costa do Marfim",
+  "Cote d'Ivoire": "Costa do Marfim",
+  "Côte d'Ivoire": "Costa do Marfim",
+  "Egypt": "Egito",
+  "Ghana": "Gana",
+  "Morocco": "Marrocos",
+  "Senegal": "Senegal",
+  "South Africa": "África do Sul",
+  "Tunisia": "Tunísia",
+  "Curacao": "Curaçao",
+  "Curaçao": "Curaçao",
+  "Haiti": "Haiti",
+  "Panama": "Panamá",
+  "Argentina": "Argentina",
+  "Brazil": "Brasil",
+  "Colombia": "Colômbia",
+  "Ecuador": "Equador",
+  "Paraguay": "Paraguai",
+  "Uruguay": "Uruguai",
+  "New Zealand": "Nova Zelândia",
+  "Austria": "Áustria",
+  "Belgium": "Bélgica",
+  "Bosnia and Herzegovina": "Bósnia e Herzegovina",
+  "Bosnia-Herzegovina": "Bósnia e Herzegovina",
+  "Croatia": "Croácia",
+  "Czechia": "Tchéquia",
+  "Czech Republic": "Tchéquia",
+  "England": "Inglaterra",
+  "France": "França",
+  "Germany": "Alemanha",
+  "Netherlands": "Holanda",
+  "Norway": "Noruega",
+  "Portugal": "Portugal",
+  "Scotland": "Escócia",
+  "Spain": "Espanha",
+  "Sweden": "Suécia",
+  "Switzerland": "Suíça",
+  "Turkiye": "Turquia",
+  "Türkiye": "Turquia",
+  "Turkey": "Turquia",
+};
+
+function traduzirPais(nomeOriginal) {
+  // Se não encontrar no dicionário (ex: "Winner Group A" antes da definição
+  // no mata-mata), devolve o nome original em vez de quebrar a tela.
+  return NOMES_PAISES_PT[nomeOriginal] || nomeOriginal;
+}
+
+let usuarioAtual = null;
+let pinAtual = null;
+
+/* ---------- Helpers de API ---------- */
+
+async function apiGet(params) {
+  const url = BACKEND_URL + "?" + new URLSearchParams(params).toString();
+  const resp = await fetch(url);
+  return resp.json();
+}
+
+async function apiPost(body) {
+  // Apps Script Web Apps exigem Content-Type "text/plain" para evitar
+  // o preflight OPTIONS do CORS (que o Apps Script não responde).
+  const resp = await fetch(BACKEND_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(body),
+  });
+  return resp.json();
+}
+
+function mostrarToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2500);
+}
+
+function formatarData(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) + " · " +
+         d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+}
+
+function chaveDoDia(iso) {
+  const d = new Date(iso);
+  // Chave no fuso local do navegador, formato AAAA-MM-DD, para agrupar corretamente
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+function formatarCabecalhoDia(iso) {
+  const d = new Date(iso);
+  const texto = d.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+  // Capitaliza a primeira letra ("quarta-feira, 25 de junho" -> "Quarta-feira, 25 de junho")
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+/* ---------- Login ---------- */
+
+function popularSelectNomes() {
+  const select = document.getElementById("login-nome");
+  select.innerHTML = "";
+  PARTICIPANTES.forEach(nome => {
+    const opt = document.createElement("option");
+    opt.value = nome;
+    opt.textContent = nome;
+    select.appendChild(opt);
+  });
+}
+
+async function tentarLogin() {
+  const nome = document.getElementById("login-nome").value;
+  const pin = document.getElementById("login-pin").value;
+  const erroEl = document.getElementById("login-erro");
+  const btn = document.getElementById("btn-login");
+
+  if (pin.length !== 4) return;
+
+  btn.disabled = true;
+  btn.textContent = "Entrando...";
+  erroEl.style.display = "none";
+
+  try {
+    const resultado = await apiPost({ action: "login", nome, pin });
+    if (resultado.ok) {
+      usuarioAtual = resultado.nome;
+      pinAtual = pin;
+      document.getElementById("tela-login").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      document.getElementById("nome-usuario-logado").textContent = usuarioAtual;
+      carregarJogos();
+      carregarRanking();
+    } else {
+      erroEl.textContent = resultado.erro || "Não foi possível entrar.";
+      erroEl.style.display = "block";
+    }
+  } catch (e) {
+    erroEl.textContent = "Erro de conexão com o backend: " + e.message;
+    erroEl.style.display = "block";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Entrar";
+  }
+}
+
+function logout() {
+  usuarioAtual = null;
+  pinAtual = null;
+  document.getElementById("login-pin").value = "";
+  document.getElementById("tela-login").style.display = "flex";
+  document.getElementById("app").style.display = "none";
+}
+
+/* ---------- Abas ---------- */
+
+function trocarAba(aba) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === aba));
+  document.getElementById("secao-palpites").style.display = aba === "palpites" ? "block" : "none";
+  document.getElementById("secao-ranking").style.display = aba === "ranking" ? "block" : "none";
+  if (aba === "ranking") carregarRanking();
+}
+
+/* ---------- Palpites ---------- */
+
+async function carregarJogos() {
+  const container = document.getElementById("lista-jogos");
+  container.innerHTML = '<div class="loading">Carregando jogos...</div>';
+
+  try {
+    const resultado = await apiGet({ action: "jogos", nome: usuarioAtual });
+    if (!resultado.ok) {
+      container.innerHTML = '<div class="empty-state">Erro ao carregar jogos: ' + (resultado.erro || "desconhecido") + '</div>';
+      return;
+    }
+    renderizarJogos(resultado.jogos);
+  } catch (e) {
+    container.innerHTML = '<div class="empty-state">Erro de conexão: ' + e.message + '</div>';
+  }
+}
+
+function renderizarJogos(jogos) {
+  const container = document.getElementById("lista-jogos");
+  if (!jogos || jogos.length === 0) {
+    container.innerHTML = '<div class="empty-state">Nenhum jogo encontrado ainda.</div>';
+    return;
+  }
+
+  // jogos já vêm em ordem cronológica do backend; agrupamos preservando essa ordem
+  const grupos = [];
+  const indicePorChave = {};
+
+  jogos.forEach(jogo => {
+    const chave = chaveDoDia(jogo.dataHoraISO);
+    if (!(chave in indicePorChave)) {
+      indicePorChave[chave] = grupos.length;
+      grupos.push({ chave: chave, jogos: [] });
+    }
+    grupos[indicePorChave[chave]].jogos.push(jogo);
+  });
+
+  container.innerHTML = "";
+
+  grupos.forEach(grupo => {
+    const divDia = document.createElement("div");
+    divDia.className = "dia-grupo";
+
+    const header = document.createElement("div");
+    header.className = "dia-header";
+    header.innerHTML = `
+      <span class="dia-titulo">${formatarCabecalhoDia(grupo.jogos[0].dataHoraISO)}</span>
+      <span class="dia-contagem">${grupo.jogos.length} jogo${grupo.jogos.length > 1 ? "s" : ""}</span>
+    `;
+    divDia.appendChild(header);
+
+    grupo.jogos.forEach(jogo => divDia.appendChild(criarCardJogo(jogo)));
+    container.appendChild(divDia);
+  });
+}
+
+function criarCardJogo(jogo) {
+  const div = document.createElement("div");
+  div.className = "jogo-card";
+
+  const travado = !jogo.aceitaPalpite;
+  const meuPalpite = jogo.meuPalpite;
+  const valorCasa = meuPalpite ? meuPalpite.casa : "";
+  const valorFora = meuPalpite ? meuPalpite.fora : "";
+
+  let resultadoHtml = "";
+  if (jogo.status === "encerrado") {
+    resultadoHtml = `<div class="resultado-final">Resultado final: <strong>${jogo.placarCasa} × ${jogo.placarFora}</strong></div>`;
+  } else if (jogo.status === "ao_vivo") {
+    resultadoHtml = `<div class="resultado-aovivo"><span class="pulse-dot"></span> Ao vivo: ${jogo.placarCasa} × ${jogo.placarFora}</div>`;
+  }
+
+  let outrosHtml = "";
+  if (jogo.outrosPalpites && jogo.outrosPalpites.length > 0) {
+    const linhas = jogo.outrosPalpites.map(p =>
+      `<div class="outro-palpite-row"><span>${p.participante}</span><span>${p.casa} × ${p.fora}${p.pontos !== null ? ` <span class="outro-palpite-pts">(${p.pontos} pts)</span>` : ""}</span></div>`
+    ).join("");
+    outrosHtml = `<div class="outros-palpites"><div class="outros-titulo">Palpites de todos</div>${linhas}</div>`;
+  }
+
+  div.innerHTML = `
+    <div class="jogo-header">
+      <span class="jogo-fase">${jogo.fase}</span>
+      <span class="jogo-data">${travado ? "🔒" : "🕐"} ${formatarData(jogo.dataHoraISO)}</span>
+    </div>
+    <div class="jogo-body">
+      <div class="placar-row">
+        <div class="time-casa">
+          <div class="time-nome">${traduzirPais(jogo.timeCasa)}</div>
+          <div class="time-sigla">${jogo.siglaCasa}</div>
+        </div>
+        <div class="placar-inputs">
+          <input type="number" min="0" max="20" class="input-casa" value="${valorCasa}" ${travado ? "disabled" : ""}>
+          <span class="placar-x">×</span>
+          <input type="number" min="0" max="20" class="input-fora" value="${valorFora}" ${travado ? "disabled" : ""}>
+        </div>
+        <div class="time-fora">
+          <div class="time-nome">${traduzirPais(jogo.timeFora)}</div>
+          <div class="time-sigla">${jogo.siglaFora}</div>
+        </div>
+      </div>
+      ${resultadoHtml}
+      <div class="acoes"></div>
+      ${outrosHtml}
+    </div>
+  `;
+
+  const acoesDiv = div.querySelector(".acoes");
+  if (!travado) {
+    const btn = document.createElement("button");
+    btn.className = "btn-confirmar";
+    btn.textContent = meuPalpite ? "Atualizar palpite" : "Confirmar palpite";
+    btn.onclick = () => salvarPalpite(jogo.jogoId, div, btn);
+    acoesDiv.appendChild(btn);
+  } else if (!meuPalpite) {
+    acoesDiv.innerHTML = '<div class="msg-travado">Você não palpitou este jogo</div>';
+  } else {
+    acoesDiv.innerHTML = '<div class="msg-travado">Palpite encerrado, sem novas edições</div>';
+  }
+
+  return div;
+}
+
+async function salvarPalpite(jogoId, cardEl, btnEl) {
+  const casa = cardEl.querySelector(".input-casa").value;
+  const fora = cardEl.querySelector(".input-fora").value;
+
+  if (casa === "" || fora === "") {
+    mostrarToast("Preencha os dois placares.");
+    return;
+  }
+
+  btnEl.disabled = true;
+  btnEl.textContent = "Salvando...";
+
+  try {
+    const resultado = await apiPost({
+      action: "palpitar",
+      nome: usuarioAtual,
+      pin: pinAtual,
+      jogoId: jogoId,
+      casa: casa,
+      fora: fora,
+    });
+
+    if (resultado.ok) {
+      mostrarToast("Palpite salvo!");
+      btnEl.textContent = "Atualizar palpite";
+    } else {
+      mostrarToast(resultado.erro || "Erro ao salvar palpite.");
+      btnEl.textContent = "Confirmar palpite";
+    }
+  } catch (e) {
+    mostrarToast("Erro de conexão: " + e.message);
+  } finally {
+    btnEl.disabled = false;
+  }
+}
+
+/* ---------- Ranking ---------- */
+
+async function carregarRanking() {
+  const container = document.getElementById("lista-ranking");
+  container.innerHTML = '<div class="loading">Carregando ranking...</div>';
+
+  try {
+    const resultado = await apiGet({ action: "ranking" });
+    if (!resultado.ok) {
+      container.innerHTML = '<div class="empty-state">Erro ao carregar ranking.</div>';
+      return;
+    }
+    renderizarRanking(resultado.ranking);
+  } catch (e) {
+    container.innerHTML = '<div class="empty-state">Erro de conexão: ' + e.message + '</div>';
+  }
+
+  // resultados encerrados (reaproveita os jogos já carregados, se houver)
+  try {
+    const resultadoJogos = await apiGet({ action: "jogos", nome: usuarioAtual });
+    if (resultadoJogos.ok) {
+      const encerrados = resultadoJogos.jogos.filter(j => j.status === "encerrado");
+      renderizarResultados(encerrados);
+    }
+  } catch (e) { /* silencioso, não é crítico */ }
+}
+
+function renderizarRanking(ranking) {
+  const container = document.getElementById("lista-ranking");
+  if (!ranking || ranking.length === 0) {
+    container.innerHTML = '<div class="empty-state">Nenhum participante encontrado.</div>';
+    return;
+  }
+
+  const lista = document.createElement("div");
+  lista.className = "ranking-list";
+
+  ranking.forEach((p, idx) => {
+    const row = document.createElement("div");
+    row.className = "ranking-row" + (idx === 0 ? " lider" : "");
+    row.innerHTML = `
+      <div class="ranking-pos">${idx + 1}</div>
+      <div style="flex:1;">
+        <div class="ranking-nome">${p.nome}${idx === 0 ? " 🏆" : ""}</div>
+        <div class="ranking-detalhe">
+          <span>✓ ${p.acertosPlacar} placar</span>
+          <span>✓ ${p.acertosVencedor} vencedor</span>
+          <span>✗ ${p.erros} errou</span>
+        </div>
+      </div>
+      <div class="ranking-pontos">${p.pontos}<small>pts</small></div>
+    `;
+    lista.appendChild(row);
+  });
+
+  container.innerHTML = "";
+  container.appendChild(lista);
+}
+
+function renderizarResultados(jogos) {
+  const container = document.getElementById("lista-resultados");
+  if (!jogos || jogos.length === 0) {
+    container.innerHTML = '<div class="empty-state" style="padding:1rem;">Nenhum jogo encerrado ainda.</div>';
+    return;
+  }
+  container.innerHTML = jogos.map(j => `
+    <div class="resultado-row">
+      <span>${traduzirPais(j.timeCasa)} <span style="color:#E5E9EF;">vs</span> ${traduzirPais(j.timeFora)}</span>
+      <span class="resultado-placar">${j.placarCasa} × ${j.placarFora}</span>
+    </div>
+  `).join("");
+}
+
+/* ---------- Inicialização ---------- */
+
+popularSelectNomes();
+document.getElementById("btn-login").addEventListener("click", tentarLogin);
+document.getElementById("login-pin").addEventListener("keydown", e => { if (e.key === "Enter") tentarLogin(); });
+document.getElementById("login-pin").addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, ""); });
+document.getElementById("btn-logout").addEventListener("click", logout);
+document.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => trocarAba(btn.dataset.tab)));
+
+</script>
+</body>
+</html>
