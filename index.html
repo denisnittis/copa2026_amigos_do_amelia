@@ -521,7 +521,11 @@ async function carregarJogos() {
       container.innerHTML = '<div class="empty-state">Erro ao carregar jogos: ' + (resultado.erro || "desconhecido") + '</div>';
       return;
     }
-    renderizarJogos(resultado.jogos);
+    // Aba Palpites mostra só o que ainda importa agir: jogos abertos (ainda
+    // dá pra palpitar) ou ao vivo (rolando agora). Jogos encerrados não
+    // aparecem mais aqui — para ver os encerrados, use a aba Histórico.
+    const ativos = resultado.jogos.filter(j => j.status !== "encerrado");
+    renderizarJogos(ativos);
   } catch (e) {
     container.innerHTML = '<div class="empty-state">Erro de conexão: ' + e.message + '</div>';
   }
@@ -530,7 +534,7 @@ async function carregarJogos() {
 function renderizarJogos(jogos) {
   const container = document.getElementById("lista-jogos");
   if (!jogos || jogos.length === 0) {
-    container.innerHTML = '<div class="empty-state">Nenhum jogo encontrado ainda.</div>';
+    container.innerHTML = '<div class="empty-state">Nenhum jogo aberto ou ao vivo no momento.</div>';
     return;
   }
 
