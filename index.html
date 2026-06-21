@@ -199,8 +199,13 @@
 </head>
 <body>
 
+<!-- ===================== SPLASH (enquanto verifica sessão salva) ===================== -->
+<div id="tela-splash" style="min-height:100vh; min-height:100dvh; display:flex; align-items:center; justify-content:center;">
+  <div style="display:inline-flex; align-items:center; justify-content:center; width:60px; height:60px; border-radius:50%; background:#D4A843; font-size:26px;">🏆</div>
+</div>
+
 <!-- ===================== TELA DE LOGIN ===================== -->
-<div id="tela-login">
+<div id="tela-login" style="display:none;">
   <div class="login-box">
     <div class="login-header">
       <div class="login-icon">🏆</div>
@@ -425,14 +430,7 @@ async function tentarLogin() {
   try {
     const resultado = await apiPost({ action: "login", nome, pin });
     if (resultado.ok) {
-      usuarioAtual = resultado.nome;
-      pinAtual = pin;
-      document.getElementById("tela-login").style.display = "none";
-      document.getElementById("app").style.display = "block";
-      document.getElementById("nome-usuario-logado").textContent = usuarioAtual;
-      carregarJogos();
-      carregarRanking();
-      iniciarAutoRefresh();
+      efetivarLogin(resultado.nome, pin);
     } else {
       erroEl.textContent = resultado.erro || "Não foi possível entrar.";
       erroEl.style.display = "block";
@@ -446,10 +444,77 @@ async function tentarLogin() {
   }
 }
 
+/* ---------- Sessão persistente (mantém login após F5) ----------
+   Salva nome + PIN no localStorage do navegador, para a pessoa não precisar
+   logar de novo a cada vez que recarrega a página. A sessão só é limpa
+   quando a pessoa clica em "sair" — não expira sozinha. */
+
+const CHAVE_SESSAO = "amigosDoAmelia_sessao";
+
+function efetivarLogin(nome, pin) {
+  usuarioAtual = nome;
+  pinAtual = pin;
+  localStorage.setItem(CHAVE_SESSAO, JSON.stringify({ nome, pin }));
+
+  document.getElementById("tela-splash").style.display = "none";
+  document.getElementById("tela-login").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("nome-usuario-logado").textContent = usuarioAtual;
+  carregarJogos();
+  carregarRanking();
+  iniciarAutoRefresh();
+}
+
+/**
+ * Roda ao carregar a página. Se houver uma sessão salva, tenta logar
+ * automaticamente com ela (revalidando nome+PIN contra o backend — assim,
+ * se o PIN tiver sido trocado na planilha, a sessão salva localmente para
+ * de funcionar sozinha, sem brecha de segurança). Se não houver sessão
+ * salva, ou se a validação falhar, mostra a tela de login normalmente.
+ * Em qualquer caso, a tela de splash (ícone girando) é escondida ao final.
+ */
+async function tentarRetomarSessao() {
+  const mostrarTelaLogin = () => {
+    document.getElementById("tela-splash").style.display = "none";
+    document.getElementById("tela-login").style.display = "flex";
+  };
+
+  const salvo = localStorage.getItem(CHAVE_SESSAO);
+  if (!salvo) {
+    mostrarTelaLogin();
+    return;
+  }
+
+  let sessao;
+  try {
+    sessao = JSON.parse(salvo);
+  } catch (e) {
+    localStorage.removeItem(CHAVE_SESSAO);
+    mostrarTelaLogin();
+    return;
+  }
+
+  try {
+    const resultado = await apiPost({ action: "login", nome: sessao.nome, pin: sessao.pin });
+    if (resultado.ok) {
+      efetivarLogin(resultado.nome, sessao.pin);
+    } else {
+      // PIN pode ter mudado, ou participante removido: limpa a sessão inválida
+      localStorage.removeItem(CHAVE_SESSAO);
+      mostrarTelaLogin();
+    }
+  } catch (e) {
+    // Falha de rede ao tentar retomar: deixa a pessoa logar manualmente,
+    // sem apagar a sessão salva (pode ser só uma instabilidade momentânea).
+    mostrarTelaLogin();
+  }
+}
+
 function logout() {
   pararAutoRefresh();
   usuarioAtual = null;
   pinAtual = null;
+  localStorage.removeItem(CHAVE_SESSAO);
   document.getElementById("login-pin").value = "";
   document.getElementById("tela-login").style.display = "flex";
   document.getElementById("app").style.display = "none";
@@ -840,6 +905,7 @@ document.getElementById("login-pin").addEventListener("keydown", e => { if (e.ke
 document.getElementById("login-pin").addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, ""); });
 document.getElementById("btn-logout").addEventListener("click", logout);
 document.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => trocarAba(btn.dataset.tab)));
+tentarRetomarSessao();
 
 </script>
 </body>
