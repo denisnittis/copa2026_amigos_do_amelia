@@ -194,6 +194,32 @@
     .login-box { max-width: 100%; }
   }
 
+  /* ---------- COMPARTILHAR RANKING ---------- */
+  .btn-compartilhar {
+    background: none; border: 1px solid #1F5A8F; border-radius: 8px; color: #D4A843;
+    font-size: 0.78rem; padding: 0.3rem 0.7rem; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  }
+  .btn-compartilhar:active { background: #0E2F54; }
+
+  /* ---------- FILTROS DO HISTÓRICO ---------- */
+  .filtros-historico { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .filtro-btn {
+    background: #0E2F54; border: 1px solid #1F5A8F; border-radius: 999px; color: #E5E9EF;
+    font-size: 0.78rem; padding: 0.35rem 0.8rem; cursor: pointer;
+  }
+  .filtro-btn.active { background: #D4A843; border-color: #D4A843; color: #0A2A4D; font-weight: 600; }
+  .filtro-btn:active { opacity: 0.8; }
+
+  /* ---------- ESTATÍSTICAS PESSOAIS ---------- */
+  .stats-painel {
+    background: #091E3A; border-top: 1px solid #1F5A8F; padding: 0.75rem 0.9rem;
+    display: none; flex-direction: column; gap: 0.4rem;
+  }
+  .stats-painel.aberto { display: flex; }
+  .stats-linha { display: flex; justify-content: space-between; font-size: 0.8rem; }
+  .stats-label { color: #E5E9EF; }
+  .stats-valor { color: #D4A843; font-weight: 600; font-family: 'Oswald', sans-serif; }
+
   /* ---------- NOTIFICAÇÃO DE GOL ---------- */
   .gol-notif {
     position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-150px);
@@ -349,7 +375,10 @@
     </div>
 
     <div id="secao-ranking" style="display:none;">
-      <div class="section-title">🏆 Classificação geral</div>
+      <div class="section-title" style="justify-content:space-between;">
+        <span>🏆 Classificação geral</span>
+        <button class="btn-compartilhar" id="btn-compartilhar" onclick="compartilharRanking()">📤 Compartilhar</button>
+      </div>
       <div id="lista-ranking" class="loading">Carregando ranking...</div>
 
       <div class="legenda-pontos">
@@ -367,6 +396,12 @@
     <div id="secao-historico" style="display:none;">
       <div class="section-title">📋 Histórico de palpites</div>
       <div class="section-hint">Palpite de todos em cada jogo já encerrado, com os pontos conquistados.</div>
+      <div class="filtros-historico" id="filtros-historico">
+        <button class="filtro-btn active" data-filtro="todos" onclick="filtrarHistorico('todos', this)">Todos</button>
+        <button class="filtro-btn" data-filtro="placar" onclick="filtrarHistorico('placar', this)">🎯 Placar exato</button>
+        <button class="filtro-btn" data-filtro="vencedor" onclick="filtrarHistorico('vencedor', this)">✓ Vencedor</button>
+        <button class="filtro-btn" data-filtro="errou" onclick="filtrarHistorico('errou', this)">✗ Errei</button>
+      </div>
       <div id="lista-historico" class="loading">Carregando histórico...</div>
     </div>
 
@@ -982,14 +1017,21 @@ function renderizarRanking(ranking) {
     return;
   }
 
+  rankingCache = ranking; // salva para compartilhar
+
   const lista = document.createElement("div");
   lista.className = "ranking-list";
 
   ranking.forEach((p, idx) => {
-    const row = document.createElement("div");
-    row.className = "ranking-row" + (idx === 0 ? " lider" : "");
+    const wrapper = document.createElement("div");
+    const euMesmo = p.nome === usuarioAtual;
+    const statsId = "stats-" + p.nome.replace(/\s+/g, "-");
 
-    // Avatar: foto real se disponível, senão iniciais
+    const row = document.createElement("div");
+    row.className = "ranking-row" + (idx === 0 ? " lider" : "") + (euMesmo ? " eu-mesmo" : "");
+    row.style.cursor = "pointer";
+    row.title = "Toque para ver estatísticas";
+
     const avatarSrc = AVATARS[p.nome];
     const avatarHtml = avatarSrc
       ? `<img class="ranking-avatar" src="${avatarSrc}" alt="${p.nome}">`
@@ -999,7 +1041,7 @@ function renderizarRanking(ranking) {
       <div class="ranking-pos">${idx + 1}</div>
       ${avatarHtml}
       <div style="flex:1;min-width:0;">
-        <div class="ranking-nome">${p.nome}${idx === 0 ? " 🏆" : ""}</div>
+        <div class="ranking-nome">${p.nome}${idx === 0 ? " 🏆" : ""}${euMesmo ? " <span style='font-size:0.65rem;color:#5C7BA0;'>(você)</span>" : ""}</div>
         <div class="ranking-detalhe">
           <span>✓ ${p.acertosPlacar} placar</span>
           <span>✓ ${p.acertosVencedor} vencedor</span>
@@ -1008,7 +1050,20 @@ function renderizarRanking(ranking) {
       </div>
       <div class="ranking-pontos">${p.pontos}<small>pts</small></div>
     `;
-    lista.appendChild(row);
+
+    const statsDiv = document.createElement("div");
+    statsDiv.className = "stats-painel";
+    statsDiv.id = statsId;
+
+    row.addEventListener("click", () => {
+      const jaAberto = statsDiv.classList.contains("aberto");
+      document.querySelectorAll(".stats-painel.aberto").forEach(el => el.classList.remove("aberto"));
+      if (!jaAberto) abrirEstatisticasPessoais(p.nome, ranking);
+    });
+
+    wrapper.appendChild(row);
+    wrapper.appendChild(statsDiv);
+    lista.appendChild(wrapper);
   });
 
   container.innerHTML = "";
@@ -1041,8 +1096,11 @@ async function carregarHistorico() {
       container.innerHTML = '<div class="empty-state">Erro ao carregar histórico: ' + (resultado.erro || "desconhecido") + '</div>';
       return;
     }
-    const encerrados = resultado.jogos.filter(j => j.status === "encerrado");
-    renderizarHistorico(encerrados);
+    const encerrados = resultado.jogos
+      .filter(j => j.status === "encerrado")
+      .sort((a, b) => new Date(b.dataHoraISO) - new Date(a.dataHoraISO)); // mais recentes primeiro
+    jogosHistoricoCache = encerrados;
+    filtrarHistorico(filtroAtivo, document.querySelector(`.filtro-btn[data-filtro="${filtroAtivo}"]`));
   } catch (e) {
     container.innerHTML = '<div class="empty-state">Erro de conexão: ' + e.message + '</div>';
   }
@@ -1213,6 +1271,82 @@ function renderizarBracket(jogos, container) {
   container.innerHTML = html;
 }
 
+/* ---------- Compartilhar ranking ---------- */
+
+let rankingCache = [];
+
+function compartilharRanking() {
+  if (!rankingCache.length) { mostrarToast("Ranking ainda carregando..."); return; }
+  const medalhas = ["🥇", "🥈", "🥉"];
+  const linhas = rankingCache.map((p, i) =>
+    `${medalhas[i] || (i + 1) + "."} ${p.nome} — ${p.pontos} pts`
+  );
+  const texto = "🏆 Amigos do Amélia · Copa 2026\n\n" + linhas.join("\n") + "\n\n⚽ bolão.app";
+  if (navigator.share) {
+    navigator.share({ title: "Ranking Amigos do Amélia", text: texto }).catch(() => {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(texto).then(() => mostrarToast("Ranking copiado! Cola no WhatsApp 📋"));
+  } else {
+    mostrarToast("Compartilhar não disponível neste navegador");
+  }
+}
+
+/* ---------- Filtro do histórico ---------- */
+
+let jogosHistoricoCache = [];
+let filtroAtivo = "todos";
+
+function filtrarHistorico(filtro, btnEl) {
+  filtroAtivo = filtro;
+  document.querySelectorAll(".filtro-btn").forEach(b => b.classList.remove("active"));
+  if (btnEl) btnEl.classList.add("active");
+
+  let jogos = jogosHistoricoCache;
+  if (filtro === "placar") {
+    jogos = jogos.filter(j => j.meuPalpite && j.meuPalpite.pontos === 5);
+  } else if (filtro === "vencedor") {
+    jogos = jogos.filter(j => j.meuPalpite && j.meuPalpite.pontos === 3);
+  } else if (filtro === "errou") {
+    jogos = jogos.filter(j => j.meuPalpite && j.meuPalpite.pontos === 0);
+  }
+
+  const container = document.getElementById("lista-historico");
+  if (!jogos.length) {
+    container.innerHTML = '<div class="empty-state">Nenhum jogo neste filtro ainda.</div>';
+    return;
+  }
+  container.innerHTML = "";
+  jogos.forEach(j => container.appendChild(criarCardHistorico(j)));
+}
+
+/* ---------- Estatísticas pessoais ---------- */
+
+function abrirEstatisticasPessoais(nomePessoa, rankingData) {
+  // Fecha qualquer painel aberto antes
+  document.querySelectorAll(".stats-painel.aberto").forEach(p => p.classList.remove("aberto"));
+
+  const p = rankingData.find(r => r.nome === nomePessoa);
+  if (!p) return;
+
+  const id = "stats-" + nomePessoa.replace(/\s+/g, "-");
+  const painel = document.getElementById(id);
+  if (!painel) return;
+
+  const totalJogos = p.jogos || (p.acertosPlacar + p.acertosVencedor + p.erros);
+  const taxaAcerto = totalJogos > 0 ? Math.round(((p.acertosPlacar + p.acertosVencedor) / totalJogos) * 100) : 0;
+  const mediaPts = totalJogos > 0 ? (p.pontos / totalJogos).toFixed(1) : "0.0";
+
+  painel.innerHTML = `
+    <div class="stats-linha"><span class="stats-label">Jogos palpitados</span><span class="stats-valor">${totalJogos}</span></div>
+    <div class="stats-linha"><span class="stats-label">Taxa de acerto</span><span class="stats-valor">${taxaAcerto}%</span></div>
+    <div class="stats-linha"><span class="stats-label">Média de pontos</span><span class="stats-valor">${mediaPts} pts/jogo</span></div>
+    <div class="stats-linha"><span class="stats-label">Placares exatos</span><span class="stats-valor">${p.acertosPlacar} 🎯</span></div>
+    <div class="stats-linha"><span class="stats-label">Vencedores certos</span><span class="stats-valor">${p.acertosVencedor} ✓</span></div>
+    <div class="stats-linha"><span class="stats-label">Erros</span><span class="stats-valor">${p.erros} ✗</span></div>
+  `;
+  painel.classList.add("aberto");
+}
+
 /* ---------- Notificação de gol ---------- */
 
 let golTimer = null;
@@ -1306,9 +1440,9 @@ function iniciarContagensRegressivas() {
       const h = Math.floor(faltam / 3600000);
       const m = Math.floor((faltam % 3600000) / 60000);
       const s = Math.floor((faltam % 60000) / 1000);
-      if (h > 0) el.textContent = `Começa em ${h}h ${m}min`;
-      else if (m > 0) el.textContent = `Começa em ${m}min ${s}s`;
-      else el.textContent = `Começa em ${s}s`;
+      if (h > 0) el.textContent = `Faltam ${h}h ${m}min`;
+      else if (m > 0) el.textContent = `Faltam ${m}min ${s}s`;
+      else el.textContent = `Faltam ${s}s`;
     }
     atualizar();
     countdownIntervals.push(setInterval(atualizar, 1000));
