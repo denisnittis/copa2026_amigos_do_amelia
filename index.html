@@ -195,6 +195,82 @@
   @media (hover: none) {
     .tab-btn:hover, .btn-primary:hover, .btn-confirmar:hover, .header-user:hover { background: initial; color: initial; }
   }
+
+  /* ---------- BADGES DE FASE — paleta uniforme azul/ouro ---------- */
+  .fase-badge {
+    display: inline-block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; padding: 0.15rem 0.5rem; border-radius: 999px; white-space: nowrap;
+    background: #0A2A4D; border: 1px solid #1F5A8F; color: #D4A843;
+  }
+  .fase-group-stage, .fase-round-of-32, .fase-round-of-16,
+  .fase-quarterfinals, .fase-semifinals, .fase-3rd-place-match { }
+  .fase-final { border-color: #D4A843; }
+
+  /* ---------- CARD DE JOGO APRIMORADO ---------- */
+  .jogo-escudo {
+    width: 40px; height: 40px; object-fit: contain; flex-shrink: 0;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+  }
+  .jogo-escudo-placeholder {
+    width: 40px; height: 40px; border-radius: 50%; background: #1F5A8F;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem; font-weight: 700; color: #D4A843; flex-shrink: 0; text-align: center;
+    line-height: 1.1;
+  }
+  .placar-central {
+    display: flex; flex-direction: column; align-items: center; flex-shrink: 0; min-width: 80px;
+  }
+  .placar-numeros {
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+  .placar-num {
+    font-family: 'Oswald', sans-serif; font-size: 2rem; font-weight: 700; color: #F7F5F0;
+    line-height: 1;
+  }
+  .placar-sep {
+    font-family: 'Oswald', sans-serif; font-size: 1.4rem; color: #5C7BA0; margin: 0 0.1rem;
+  }
+  .placar-inputs-novo {
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+  .placar-inputs-novo input {
+    width: 46px; height: 52px; text-align: center; margin: 0;
+    font-family: 'Oswald', sans-serif; font-size: 1.4rem; padding: 0;
+    -moz-appearance: textfield;
+  }
+  .placar-inputs-novo input::-webkit-outer-spin-button,
+  .placar-inputs-novo input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .placar-inputs-novo .placar-sep { font-size: 1.2rem; }
+
+  .time-bloco { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; flex: 1; min-width: 0; }
+  .time-bloco .time-nome { text-align: center; font-size: clamp(0.72rem, 3.5vw, 0.9rem); }
+  .time-bloco .time-sigla { text-align: center; }
+
+  /* ---------- CHAVEAMENTO BRACKET ---------- */
+  #secao-chaveamento { display: none; }
+  .bracket-scroll { overflow-x: auto; padding-bottom: 1rem; scrollbar-width: thin; scrollbar-color: #1F5A8F transparent; }
+  .bracket-inner { display: flex; align-items: flex-start; min-width: max-content; padding: 0.25rem 0; }
+  .bracket-coluna { display: flex; flex-direction: column; min-width: 138px; flex-shrink: 0; }
+  .bracket-coluna-titulo { font-family: 'Oswald', sans-serif; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.06em; color: #D4A843; text-align: center; padding: 0.25rem 0 0.4rem; }
+  .bracket-linha { width: 14px; align-self: stretch; flex-shrink: 0; display: flex; }
+  .bracket-linha svg { width: 14px; height: 100%; }
+  .bracket-estrela { display: flex; align-items: center; justify-content: center; width: 26px; align-self: center; font-size: 1.1rem; flex-shrink: 0; }
+  .bracket-3lugar { margin-top: 1.25rem; padding-top: 0.75rem; border-top: 1px dashed #1F5A8F; }
+  .bracket-3lugar-titulo { font-size: 0.65rem; color: #5C7BA0; text-transform: uppercase; letter-spacing: 0.05em; text-align: center; margin-bottom: 0.5rem; }
+  .bc { background: #0E2F54; border: 1px solid #1F5A8F; border-radius: 6px; overflow: hidden; margin: 3px 0; }
+  .bc.ao-vivo { border-color: #E8847B; }
+  .bc.encerrado { border-color: #243A60; }
+  .bc-time { display: flex; align-items: center; gap: 0.28rem; padding: 0.3rem 0.4rem; font-size: 0.7rem; border-bottom: 1px solid #112540; min-height: 26px; }
+  .bc-time:last-of-type { border-bottom: none; }
+  .bc-time img { width: 15px; height: 15px; object-fit: contain; flex-shrink: 0; }
+  .bc-time-ph { width: 15px; height: 15px; border-radius: 50%; background: #1F5A8F; flex-shrink: 0; }
+  .bc-time-nome { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #E5E9EF; }
+  .bc-time-gol { font-family: 'Oswald', sans-serif; font-size: 0.82rem; font-weight: 700; padding-left: 0.25rem; flex-shrink: 0; color: #F7F5F0; }
+  .bc-time.vencedor .bc-time-nome { color: #D4A843; font-weight: 600; }
+  .bc-time.vencedor .bc-time-gol { color: #D4A843; }
+  .bc-label { font-size: 0.52rem; color: #5C7BA0; text-align: center; padding: 0.12rem 0; background: #091E3A; }
+  .bc.ao-vivo .bc-label { color: #E8847B; }
+
 </style>
 </head>
 <body>
@@ -237,6 +313,7 @@
     <div class="tabs">
       <button class="tab-btn active" data-tab="palpites">Palpites</button>
       <button class="tab-btn" data-tab="ranking">Ranking</button>
+      <button class="tab-btn" data-tab="chaveamento">Chaves</button>
       <button class="tab-btn" data-tab="historico">Histórico</button>
     </div>
   </header>
@@ -268,6 +345,12 @@
       <div class="section-title">📋 Histórico de palpites</div>
       <div class="section-hint">Palpite de todos em cada jogo já encerrado, com os pontos conquistados.</div>
       <div id="lista-historico" class="loading">Carregando histórico...</div>
+    </div>
+
+    <div id="secao-chaveamento" style="display:none;">
+      <div class="section-title">🏆 Chaveamento</div>
+      <div class="section-hint">Acompanhe o mata-mata completo da Copa 2026.</div>
+      <div id="lista-chaveamento" class="loading">Carregando chaveamento...</div>
     </div>
   </main>
 </div>
@@ -528,8 +611,10 @@ function trocarAba(aba) {
   document.getElementById("secao-palpites").style.display = aba === "palpites" ? "block" : "none";
   document.getElementById("secao-ranking").style.display = aba === "ranking" ? "block" : "none";
   document.getElementById("secao-historico").style.display = aba === "historico" ? "block" : "none";
+  document.getElementById("secao-chaveamento").style.display = aba === "chaveamento" ? "block" : "none";
   if (aba === "ranking") carregarRanking();
   if (aba === "historico") carregarHistorico();
+  if (aba === "chaveamento") carregarChaveamento();
 }
 
 /* ---------- Auto-refresh ----------
@@ -550,6 +635,7 @@ function recarregarAbaAtual() {
   if (abaAtual === "palpites") carregarJogos();
   else if (abaAtual === "ranking") carregarRanking();
   else if (abaAtual === "historico") carregarHistorico();
+  else if (abaAtual === "chaveamento") carregarChaveamento();
 }
 
 function iniciarAutoRefresh() {
@@ -637,22 +723,76 @@ function renderizarJogos(jogos) {
   });
 }
 
+/* ---------- Utilitários de fase ---------- */
+
+const FASES_PT = {
+  'group-stage':      { label: 'Fase de Grupos',     css: 'fase-group-stage' },
+  'round-of-32':      { label: 'Round of 32',         css: 'fase-round-of-32' },
+  'round-of-16':      { label: 'Oitavas de Final',    css: 'fase-round-of-16' },
+  'quarterfinals':    { label: 'Quartas de Final',    css: 'fase-quarterfinals' },
+  'semifinals':       { label: 'Semifinais',          css: 'fase-semifinals' },
+  '3rd-place-match':  { label: '3º Lugar',            css: 'fase-3rd-place-match' },
+  'final':            { label: 'Final',               css: 'fase-final' },
+};
+
+function infoFase(fase) {
+  const slug = (fase || '').toLowerCase().replace(/_/g, '-');
+  return FASES_PT[slug] || { label: fase, css: 'fase-group-stage' };
+}
+
+function escudoHtml(logo, sigla, tamanho = 40) {
+  if (logo) {
+    return `<img class="jogo-escudo" src="${logo}" alt="${sigla}" width="${tamanho}" height="${tamanho}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="jogo-escudo-placeholder" style="display:none;width:${tamanho}px;height:${tamanho}px;font-size:${tamanho * 0.3}px;">${sigla}</div>`;
+  }
+  return `<div class="jogo-escudo-placeholder" style="width:${tamanho}px;height:${tamanho}px;">${sigla}</div>`;
+}
+
 function criarCardJogo(jogo) {
   const div = document.createElement("div");
   div.className = "jogo-card";
+  div.dataset.jogoId = jogo.jogoId;
 
   const travado = !jogo.aceitaPalpite;
   const meuPalpite = jogo.meuPalpite;
   const valorCasa = meuPalpite ? meuPalpite.casa : "";
   const valorFora = meuPalpite ? meuPalpite.fora : "";
+  const fase = infoFase(jogo.fase);
 
-  let resultadoHtml = "";
-  if (jogo.status === "encerrado") {
-    resultadoHtml = `<div class="resultado-final">Resultado final: <strong>${jogo.placarCasa} × ${jogo.placarFora}</strong></div>`;
-  } else if (jogo.status === "ao_vivo") {
-    resultadoHtml = `<div class="resultado-aovivo"><span class="pulse-dot"></span> Ao vivo: ${jogo.placarCasa} × ${jogo.placarFora}</div>`;
+  // Badge de fase colorido
+  const badgeHtml = `<span class="fase-badge ${fase.css}">${fase.label}</span>`;
+
+  // Indicador de status/horário
+  let statusHtml = `${travado ? "🔒" : "🕐"} ${formatarData(jogo.dataHoraISO)}`;
+  if (jogo.status === "ao_vivo") {
+    statusHtml = `<span class="pulse-dot"></span> Ao vivo`;
   }
 
+  // Escudos
+  const escudoCasa = escudoHtml(jogo.logoCasa, jogo.siglaCasa, 40);
+  const escudoFora = escudoHtml(jogo.logoFora, jogo.siglaFora, 40);
+
+  // Placar central (input ou exibição dependendo do estado)
+  let placarHtml;
+  if (!travado) {
+    placarHtml = `
+      <div class="placar-inputs-novo">
+        <input type="number" min="0" max="20" class="input-casa" value="${valorCasa}" inputmode="numeric">
+        <span class="placar-sep">×</span>
+        <input type="number" min="0" max="20" class="input-fora" value="${valorFora}" inputmode="numeric">
+      </div>`;
+  } else if (jogo.placarCasa !== null) {
+    placarHtml = `
+      <div class="placar-numeros">
+        <span class="placar-num">${jogo.placarCasa}</span>
+        <span class="placar-sep">×</span>
+        <span class="placar-num">${jogo.placarFora}</span>
+      </div>`;
+  } else {
+    placarHtml = `<div style="font-family:'Oswald',sans-serif;color:#5C7BA0;font-size:1.1rem;">vs</div>`;
+  }
+
+  // Palpites dos outros
   let outrosHtml = "";
   if (jogo.outrosPalpites && jogo.outrosPalpites.length > 0) {
     const linhas = jogo.outrosPalpites.map(p =>
@@ -661,28 +801,36 @@ function criarCardJogo(jogo) {
     outrosHtml = `<div class="outros-palpites"><div class="outros-titulo">Palpites de todos</div>${linhas}</div>`;
   }
 
+  // Meu palpite (exibição quando travado)
+  let meuPalpiteHtml = "";
+  if (travado && meuPalpite) {
+    const pts = meuPalpite.pontos;
+    const corPts = pts === 5 ? "#D4A843" : pts === 3 ? "#7FB3D4" : pts === 0 ? "#E8847B" : "#E5E9EF";
+    const textoPts = pts !== null ? `<span style="color:${corPts};font-weight:600;"> (${pts} pts)</span>` : "";
+    meuPalpiteHtml = `<div class="resultado-final" style="margin-top:0.5rem;">Meu palpite: <strong>${meuPalpite.casa} × ${meuPalpite.fora}</strong>${textoPts}</div>`;
+  }
+
   div.innerHTML = `
     <div class="jogo-header">
-      <span class="jogo-fase">${jogo.fase}</span>
-      <span class="jogo-data">${travado ? "🔒" : "🕐"} ${formatarData(jogo.dataHoraISO)}</span>
+      ${badgeHtml}
+      <span class="jogo-data">${statusHtml}</span>
     </div>
     <div class="jogo-body">
-      <div class="placar-row">
-        <div class="time-casa">
+      <div class="placar-row" style="align-items:flex-start; gap:0.4rem;">
+        <div class="time-bloco">
+          ${escudoCasa}
           <div class="time-nome">${traduzirPais(jogo.timeCasa)}</div>
-          <div class="time-sigla">${jogo.siglaCasa}</div>
         </div>
-        <div class="placar-inputs">
-          <input type="number" min="0" max="20" class="input-casa" value="${valorCasa}" ${travado ? "disabled" : ""}>
-          <span class="placar-x">×</span>
-          <input type="number" min="0" max="20" class="input-fora" value="${valorFora}" ${travado ? "disabled" : ""}>
+        <div class="placar-central" style="padding-top:0.25rem;">
+          ${placarHtml}
+          ${jogo.status === "ao_vivo" ? `<div style="font-size:0.65rem;color:#E8847B;margin-top:0.3rem;display:flex;align-items:center;gap:0.3rem;"><span class='pulse-dot'></span>Ao vivo</div>` : ""}
         </div>
-        <div class="time-fora">
+        <div class="time-bloco">
+          ${escudoFora}
           <div class="time-nome">${traduzirPais(jogo.timeFora)}</div>
-          <div class="time-sigla">${jogo.siglaFora}</div>
         </div>
       </div>
-      ${resultadoHtml}
+      ${meuPalpiteHtml}
       <div class="acoes"></div>
       ${outrosHtml}
     </div>
@@ -697,8 +845,6 @@ function criarCardJogo(jogo) {
     acoesDiv.appendChild(btn);
   } else if (!meuPalpite) {
     acoesDiv.innerHTML = '<div class="msg-travado">Você não palpitou este jogo</div>';
-  } else {
-    acoesDiv.innerHTML = '<div class="msg-travado">Palpite encerrado, sem novas edições</div>';
   }
 
   return div;
@@ -897,6 +1043,104 @@ function criarCardHistorico(jogo) {
   `;
 
   return div;
+}
+
+/* ---------- Chaveamento ---------- */
+
+const FASES_BRACKET = [
+  { slug: 'round-of-32',   label: 'Round of 32', count: 16 },
+  { slug: 'round-of-16',   label: 'Oitavas',     count: 8  },
+  { slug: 'quarterfinals', label: 'Quartas',      count: 4  },
+  { slug: 'semifinals',    label: 'Semifinais',   count: 2  },
+  { slug: 'final',         label: 'Final',        count: 1  },
+];
+
+async function carregarChaveamento() {
+  const container = document.getElementById("lista-chaveamento");
+  container.innerHTML = '<div class="loading">Carregando chaveamento...</div>';
+  try {
+    const resultado = await apiGet({ action: "jogos", nome: usuarioAtual });
+    if (!resultado.ok) { container.innerHTML = '<div class="empty-state">Erro ao carregar.</div>'; return; }
+    const mata = resultado.jogos.filter(j => j.fase !== "group-stage");
+    renderizarBracket(mata, container);
+  } catch (e) {
+    container.innerHTML = '<div class="empty-state">Erro: ' + e.message + '</div>';
+  }
+}
+
+function slugFase(fase) {
+  return (fase || '').toLowerCase().replace(/_/g, '-').trim();
+}
+
+function bcTimeHtml(logo, nome, gol, vencedor) {
+  const imgHtml = logo
+    ? '<img src="' + logo + '" alt="" width="15" height="15" loading="lazy" style="object-fit:contain;flex-shrink:0;" onerror="this.style.display=\'none\'">'
+    : '<div class="bc-time-ph"></div>';
+  const nomeExib = traduzirPais(nome) || '-';
+  const golStr = (gol !== null && gol !== '' && gol !== undefined) ? String(gol) : '';
+  return '<div class="bc-time ' + (vencedor ? 'vencedor' : '') + '">' +
+    imgHtml +
+    '<span class="bc-time-nome">' + nomeExib + '</span>' +
+    (golStr !== '' ? '<span class="bc-time-gol">' + golStr + '</span>' : '') +
+    '</div>';
+}
+
+function criarBcCard(jogo) {
+  if (!jogo) return '<div class="bc" style="opacity:0.25;">' +
+    '<div class="bc-time"><div class="bc-time-ph"></div><span class="bc-time-nome" style="color:#5C7BA0;">A definir</span></div>' +
+    '<div class="bc-time"><div class="bc-time-ph"></div><span class="bc-time-nome" style="color:#5C7BA0;">A definir</span></div></div>';
+  const temPlacar = jogo.placarCasa !== null && jogo.placarCasa !== '';
+  const casaV = temPlacar && Number(jogo.placarCasa) > Number(jogo.placarFora);
+  const foraV = temPlacar && Number(jogo.placarFora) > Number(jogo.placarCasa);
+  const cls = jogo.status === "ao_vivo" ? " ao-vivo" : jogo.status === "encerrado" ? " encerrado" : "";
+  const label = jogo.status === "ao_vivo" ? "Ao vivo" : formatarData(jogo.dataHoraISO);
+  return '<div class="bc' + cls + '">' +
+    '<div class="bc-label">' + label + '</div>' +
+    bcTimeHtml(jogo.logoCasa, jogo.timeCasa, temPlacar ? jogo.placarCasa : null, casaV && jogo.status === "encerrado") +
+    bcTimeHtml(jogo.logoFora, jogo.timeFora, temPlacar ? jogo.placarFora : null, foraV && jogo.status === "encerrado") +
+    '</div>';
+}
+
+function renderizarBracket(jogos, container) {
+  const porFase = {};
+  jogos.forEach(j => {
+    const s = slugFase(j.fase);
+    if (!porFase[s]) porFase[s] = [];
+    porFase[s].push(j);
+  });
+  Object.values(porFase).forEach(arr => arr.sort((a, b) => new Date(a.dataHoraISO) - new Date(b.dataHoraISO)));
+  const terceiro = (porFase['3rd-place-match'] || [])[0];
+
+  // Terceiro lugar aparece acima da final, numa coluna separada antes do bracket da final
+  let html = '<div class="bracket-scroll"><div class="bracket-inner">';
+  FASES_BRACKET.forEach((fase, fi) => {
+    const faseJogos = porFase[fase.slug] || [];
+    const slots = Array.from({ length: fase.count }, (_, i) => faseJogos[i] || null);
+    const gap = 8 * Math.pow(2, fi);
+
+    // Antes da coluna da Final, insere o 3º lugar
+    if (fase.slug === 'final' && terceiro) {
+      html += '<div class="bracket-coluna" style="min-width:138px;">';
+      html += '<div class="bracket-coluna-titulo" style="color:#5C7BA0;">3&ordm; Lugar</div>';
+      html += '<div style="display:flex;flex-direction:column;flex:1;justify-content:center;">';
+      html += criarBcCard(terceiro);
+      html += '</div></div>';
+      html += '<div style="width:8px;flex-shrink:0;"></div>';
+    }
+
+    html += '<div class="bracket-coluna"><div class="bracket-coluna-titulo">' + fase.label + '</div>';
+    html += '<div style="display:flex;flex-direction:column;gap:' + gap + 'px;flex:1;">';
+    slots.forEach(j => { html += criarBcCard(j); });
+    html += '</div></div>';
+
+    // Sem linhas de conexão e sem taça
+    if (fi < FASES_BRACKET.length - 1) {
+      html += '<div style="width:6px;flex-shrink:0;"></div>';
+    }
+  });
+
+  html += '</div></div>';
+  container.innerHTML = html;
 }
 
 /* ---------- Inicialização ---------- */
