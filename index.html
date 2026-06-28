@@ -995,7 +995,6 @@ async function carregarRanking() {
       return;
     }
     renderizarRanking(resultado.ranking);
-    verificarConfeteRanking(resultado.ranking);
   } catch (e) {
     container.innerHTML = '<div class="empty-state">Erro de conexão: ' + e.message + '</div>';
   }
@@ -1332,8 +1331,12 @@ function abrirEstatisticasPessoais(nomePessoa, rankingData) {
   if (!painel) return;
 
   const totalPalpitados = p.jogos || 0;
-  const encerrados = p.jogosEncerrados !== undefined ? p.jogosEncerrados : (p.acertosPlacar + p.acertosVencedor + p.erros);
-  const pendentes = totalPalpitados - encerrados;
+  // jogosEncerrados só vem depois da nova implantação do backend;
+  // fallback: soma acertos + erros que já vieram pontuados
+  const encerrados = (p.jogosEncerrados !== undefined && p.jogosEncerrados !== null)
+    ? p.jogosEncerrados
+    : (p.acertosPlacar + p.acertosVencedor + p.erros);
+  const pendentes = Math.max(0, totalPalpitados - encerrados);
   const taxaAcerto = encerrados > 0 ? Math.round(((p.acertosPlacar + p.acertosVencedor) / encerrados) * 100) : 0;
   const mediaPts = encerrados > 0 ? (p.pontos / encerrados).toFixed(1) : "0.0";
 
@@ -1411,14 +1414,9 @@ function dispararConfete() {
 
 /* ---------- Confete de acerto de placar ---------- */
 
-function verificarConfeteRanking(ranking) {
-  // Dispara confete se o usuário logado acertou algum placar recentemente
-  const eu = ranking.find(p => p.nome === usuarioAtual);
-  if (eu && eu.acertosPlacar > (verificarConfeteRanking._ultimo || 0)) {
-    dispararConfete();
-    mostrarToast("🎯 Você acertou o placar! +5 pts");
-  }
-  verificarConfeteRanking._ultimo = eu ? eu.acertosPlacar : 0;
+function dispararConfeteAcerto() {
+  dispararConfete();
+  mostrarToast("🎯 Palpite confirmado!");
 }
 
 /* ---------- Contagem regressiva ---------- */
