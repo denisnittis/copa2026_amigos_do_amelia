@@ -194,6 +194,26 @@
     .login-box { max-width: 100%; }
   }
 
+  /* ---------- NOTIFICAÇÃO DE GOL ---------- */
+  .gol-notif {
+    position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%) translateY(-150px);
+    background: linear-gradient(135deg, #1A3A0A, #0A2A4D); border: 2px solid #D4A843;
+    border-radius: 12px; padding: 0.75rem 1.25rem; z-index: 100;
+    display: flex; align-items: center; gap: 0.6rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    max-width: calc(100vw - 2rem); pointer-events: none;
+  }
+  .gol-notif.show { transform: translateX(-50%) translateY(0); }
+  .gol-emoji { font-size: 1.6rem; flex-shrink: 0; }
+  .gol-texto { font-family: 'Oswald', sans-serif; }
+  .gol-titulo { color: #D4A843; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .gol-placar { color: #F7F5F0; font-size: 1.1rem; }
+  /* ---------- CONFETE ---------- */
+  .confete-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 99; }
+  /* ---------- CONTAGEM REGRESSIVA ---------- */
+  .countdown { font-size: 0.72rem; color: #D4A843; margin-top: 0.2rem; font-variant-numeric: tabular-nums; }
+
   /* ---------- TOUCH: remove hovers em dispositivos sem mouse, mantém apenas active ---------- */
   @media (hover: none) {
     .tab-btn:hover, .btn-primary:hover, .btn-confirmar:hover, .header-user:hover { background: initial; color: initial; }
@@ -359,6 +379,14 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="gol-notif" id="gol-notif">
+  <div class="gol-emoji">⚽</div>
+  <div class="gol-texto">
+    <div class="gol-titulo" id="gol-titulo">Gol!</div>
+    <div class="gol-placar" id="gol-placar"></div>
+  </div>
+</div>
+<canvas class="confete-canvas" id="confete-canvas"></canvas>
 
 <script>
 /* =========================================================
@@ -676,6 +704,9 @@ document.addEventListener("visibilitychange", () => {
 
 /* ---------- Palpites ---------- */
 
+// Estado anterior dos placares ao vivo — para detectar gols entre refreshes
+let placaresAnteriores = {};
+
 async function carregarJogos() {
   const container = document.getElementById("lista-jogos");
   container.innerHTML = '<div class="loading">Carregando jogos...</div>';
@@ -686,11 +717,26 @@ async function carregarJogos() {
       container.innerHTML = '<div class="empty-state">Erro ao carregar jogos: ' + (resultado.erro || "desconhecido") + '</div>';
       return;
     }
-    // Aba Palpites mostra só o que ainda importa agir: jogos abertos (ainda
-    // dá pra palpitar) ou ao vivo (rolando agora). Jogos encerrados não
-    // aparecem mais aqui — para ver os encerrados, use a aba Histórico.
     const ativos = resultado.jogos.filter(j => j.status !== "encerrado");
+
+    // Detecta gols: compara placar atual com o anterior
+    ativos.forEach(jogo => {
+      if (jogo.status !== "ao_vivo" || jogo.placarCasa === null) return;
+      const key = String(jogo.jogoId);
+      const ant = placaresAnteriores[key];
+      const placarAtual = `${jogo.placarCasa}-${jogo.placarFora}`;
+      if (ant && ant !== placarAtual) {
+        const [antC, antF] = ant.split("-").map(Number);
+        const [nowC, nowF] = [Number(jogo.placarCasa), Number(jogo.placarFora)];
+        if (nowC > antC) mostrarNotificacaoGol(traduzirPais(jogo.timeCasa), nowC, nowF, traduzirPais(jogo.timeFora));
+        else if (nowF > antF) mostrarNotificacaoGol(traduzirPais(jogo.timeFora), nowF, nowC, traduzirPais(jogo.timeCasa));
+      }
+      placaresAnteriores[key] = placarAtual;
+    });
+
     renderizarJogos(ativos);
+    // Inicia contagens regressivas nos cards de jogos futuros
+    setTimeout(iniciarContagensRegressivas, 50);
   } catch (e) {
     container.innerHTML = '<div class="empty-state">Erro de conexão: ' + e.message + '</div>';
   }
@@ -774,10 +820,13 @@ function criarCardJogo(jogo) {
   // Badge de fase colorido
   const badgeHtml = `<span class="fase-badge ${fase.css}">${fase.label}</span>`;
 
-  // Indicador de status/horário
+  // Indicador de status/horário + contagem regressiva para jogos futuros
   let statusHtml = `${travado ? "🔒" : "🕐"} ${formatarData(jogo.dataHoraISO)}`;
   if (jogo.status === "ao_vivo") {
     statusHtml = `<span class="pulse-dot"></span> Ao vivo`;
+  } else if (!travado && jogo.status === "aberto") {
+    // Adiciona contagem regressiva abaixo do horário
+    statusHtml = `🕐 ${formatarData(jogo.dataHoraISO)}<br><span class="countdown" data-inicio-iso="${jogo.dataHoraISO}"></span>`;
   }
 
   // Escudos
@@ -911,6 +960,7 @@ async function carregarRanking() {
       return;
     }
     renderizarRanking(resultado.ranking);
+    verificarConfeteRanking(resultado.ranking);
   } catch (e) {
     container.innerHTML = '<div class="empty-state">Erro de conexão: ' + e.message + '</div>';
   }
@@ -1161,6 +1211,108 @@ function renderizarBracket(jogos, container) {
 
   html += '</div></div>';
   container.innerHTML = html;
+}
+
+/* ---------- Notificação de gol ---------- */
+
+let golTimer = null;
+
+function mostrarNotificacaoGol(timeGol, golsGol, golsAdv, timeAdv) {
+  const el = document.getElementById("gol-notif");
+  document.getElementById("gol-titulo").textContent = "⚽ GOL DE " + timeGol.toUpperCase() + "!";
+  document.getElementById("gol-placar").textContent = timeGol + " " + golsGol + " × " + golsAdv + " " + timeAdv;
+  el.classList.add("show");
+  if (golTimer) clearTimeout(golTimer);
+  golTimer = setTimeout(() => el.classList.remove("show"), 5000);
+  dispararConfete();
+}
+
+/* ---------- Confete ---------- */
+
+function dispararConfete() {
+  const canvas = document.getElementById("confete-canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const cores = ["#D4A843", "#F7F5F0", "#1F5A8F", "#E8847B", "#7CDB52"];
+  const particulas = Array.from({ length: 80 }, () => ({
+    x: Math.random() * canvas.width,
+    y: -10 - Math.random() * 100,
+    r: 4 + Math.random() * 5,
+    cor: cores[Math.floor(Math.random() * cores.length)],
+    vx: (Math.random() - 0.5) * 4,
+    vy: 2 + Math.random() * 4,
+    rot: Math.random() * 360,
+    vrot: (Math.random() - 0.5) * 8,
+    op: 1,
+  }));
+
+  let frame;
+  function animar() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let vivas = 0;
+    particulas.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.rot += p.vrot;
+      if (p.y > canvas.height * 0.6) p.op -= 0.025;
+      if (p.op <= 0) return;
+      vivas++;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.op);
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.cor;
+      ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 0.5);
+      ctx.restore();
+    });
+    if (vivas > 0) frame = requestAnimationFrame(animar);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  if (frame) cancelAnimationFrame(frame);
+  animar();
+}
+
+/* ---------- Confete de acerto de placar ---------- */
+
+function verificarConfeteRanking(ranking) {
+  // Dispara confete se o usuário logado acertou algum placar recentemente
+  const eu = ranking.find(p => p.nome === usuarioAtual);
+  if (eu && eu.acertosPlacar > (verificarConfeteRanking._ultimo || 0)) {
+    dispararConfete();
+    mostrarToast("🎯 Você acertou o placar! +5 pts");
+  }
+  verificarConfeteRanking._ultimo = eu ? eu.acertosPlacar : 0;
+}
+
+/* ---------- Contagem regressiva ---------- */
+
+let countdownIntervals = [];
+
+function iniciarContagensRegressivas() {
+  // Limpa intervalos anteriores
+  countdownIntervals.forEach(clearInterval);
+  countdownIntervals = [];
+
+  document.querySelectorAll("[data-inicio-iso]").forEach(el => {
+    const iso = el.dataset.inicioIso;
+    const inicio = new Date(iso).getTime();
+
+    function atualizar() {
+      const faltam = inicio - Date.now();
+      if (faltam <= 0) {
+        el.textContent = "Apito inicial!";
+        return;
+      }
+      const h = Math.floor(faltam / 3600000);
+      const m = Math.floor((faltam % 3600000) / 60000);
+      const s = Math.floor((faltam % 60000) / 1000);
+      if (h > 0) el.textContent = `Começa em ${h}h ${m}min`;
+      else if (m > 0) el.textContent = `Começa em ${m}min ${s}s`;
+      else el.textContent = `Começa em ${s}s`;
+    }
+    atualizar();
+    countdownIntervals.push(setInterval(atualizar, 1000));
+  });
 }
 
 /* ---------- Inicialização ---------- */
